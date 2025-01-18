@@ -1,0 +1,33 @@
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos de compilación
+/target/
+*.class
+*.war
+*.jar
+
+# Logs
+/logs/
+/*.log
+
+# Configuraciones del IDE
+/.classpath
+/.project
+/.settings/
+/.idea/
+/*.iml
+/.vscode/
+
+# Archivos sensibles
+/application-local.properties
+/application-dev.properties
+/secrets/
+
+# Archivos temporales
+/.cache/
+*.tmp
+
+# Dependencias de Maven
+/.mvn/
