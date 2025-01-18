@@ -23,8 +23,8 @@ Una API REST desarrollada en Java usando Spring Boot, que permite la gestión de
 ## Instalación
 ### 1. Clona el repositorio:
 ```bash
-git clone https://github.com/tuusuario/book-catalogue.git
-cd book-catalogue
+git clone https://quintodev-admin@bitbucket.org/quintodev/ms-books-catalogue.git
+cd ms-books-catalogue
 ```
 
 ### 2. Construye el proyecto con Maven:
