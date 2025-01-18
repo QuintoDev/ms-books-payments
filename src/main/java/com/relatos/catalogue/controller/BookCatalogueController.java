@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -21,6 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.relatos.catalogue.model.Book;
 import com.relatos.catalogue.service.BookService;
+import com.relatos.catalogue.validation.PartialUpdate;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/books")
@@ -43,7 +47,7 @@ public class BookCatalogueController {
 		try {
 			List<Book> book = bookService.getAllBooks();
 			if (book.isEmpty()) {
-				logger.warn("[BookCatalogue - getAllBooks] The book list is empty. Current size: {}.", book.size());
+				logger.error("[BookCatalogue - getAllBooks] The book list is empty. Current size: {}.", book.size());
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "The book list is empty."));
 			} else {
 				logger.info("[BookCatalogue - getAllBooks] Successfully retrieved the list of books. Total books: {}.",
@@ -65,7 +69,7 @@ public class BookCatalogueController {
 	 * @return
 	 */
 	@GetMapping("/{isbn}")
-	public ResponseEntity<?> getBooksByISBN(@PathVariable long isbn) {
+	public ResponseEntity<?> getBooksByISBN(@Valid @PathVariable long isbn) {
 		try {
 			Book book = bookService.getBookByISBN(isbn);
 			logger.info("[BookCatalogue - getBooksByISBN] Successfully found a book with ISBN: {}.", isbn);
@@ -89,7 +93,7 @@ public class BookCatalogueController {
 	 * @return
 	 */
 	@GetMapping("/search")
-	public ResponseEntity<?> searchBooks(@RequestParam(required = false) String title,
+	public ResponseEntity<?> searchBooks(@Valid @RequestParam(required = false) String title,
 			@RequestParam(required = false) String author, @RequestParam(required = false) String publicationDate,
 			@RequestParam(required = false) String genre, @RequestParam(required = false) Long isbn,
 			@RequestParam(required = false) Double rate, @RequestParam(required = false) Boolean display) {
@@ -121,7 +125,7 @@ public class BookCatalogueController {
 	 * @return
 	 */
 	@PostMapping
-	public ResponseEntity<?> createBook(@RequestBody Book createBook) {
+	public ResponseEntity<?> createBook(@Validated(PartialUpdate.class) @RequestBody Book createBook) {
 		try {
 			Book book = bookService.createBook(createBook);
 			logger.info("[BookCatalogue - createBook] Successfully created a book titled '{}'.", createBook.getTitle());
@@ -129,8 +133,8 @@ public class BookCatalogueController {
 		} catch (Exception e) {
 			logger.error("[BookCatalogue - createBook] Failed to create the book titled '{}'. Error: {}",
 					createBook.getTitle(), e.getMessage());
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(Map.of("error", "An error occurred while creating the book."));
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.body(Map.of("error", "A book with the same title already exists"));
 		}
 	}
 
@@ -141,7 +145,7 @@ public class BookCatalogueController {
 	 * @return
 	 */
 	@PutMapping("/{isbn}")
-	public ResponseEntity<?> updateFullBook(@PathVariable long isbn, @RequestBody Book updateBook) {
+	public ResponseEntity<?> updateFullBook(@Valid @PathVariable long isbn,@Validated(PartialUpdate.class) @RequestBody Book updateBook) {
 		try {
 			Book book = bookService.updateBook(isbn, updateBook);
 			logger.info("[BookCatalogue - updateFullBook] Successfully updated the book titled '{}'.",
@@ -161,7 +165,7 @@ public class BookCatalogueController {
 	 * @return
 	 */
 	@PatchMapping("/{isbn}")
-	public ResponseEntity<?> partialUpdateBook(@PathVariable long isbn, @RequestBody Book updateBook) {
+	public ResponseEntity<?> partialUpdateBook(@Valid @PathVariable long isbn, @Validated(PartialUpdate.class) @RequestBody Book updateBook) {
 		try {
 			Book book = bookService.partialUpdateBook(isbn, updateBook);
 			logger.info(
@@ -183,7 +187,7 @@ public class BookCatalogueController {
 	 * @return
 	 */
 	@DeleteMapping("/{isbn}")
-	public ResponseEntity<?> deleteBookByISBN(@PathVariable long isbn) {
+	public ResponseEntity<?> deleteBookByISBN(@Valid @PathVariable long isbn) {
 		try {
 			boolean isDeleted = bookService.deleteBookByISBN(isbn);
 			if (isDeleted) {

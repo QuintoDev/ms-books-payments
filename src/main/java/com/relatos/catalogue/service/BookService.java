@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.relatos.catalogue.exception.BookNotFoundException;
+import com.relatos.catalogue.exception.DuplicateBookException;
 import com.relatos.catalogue.model.Book;
 import com.relatos.catalogue.utils.ISBNGenerator;
 
@@ -32,7 +34,7 @@ public class BookService {
 	 */
 	public Book getBookByISBN(long isbn) {
 		return books.stream().filter(book -> book.getISBN() == isbn).findFirst()
-				.orElseThrow(() -> new IllegalArgumentException("Book not found with ISBN " + isbn));
+				.orElseThrow(() -> new BookNotFoundException("Book not found with ISBN " + isbn));
 	}
 
 	/**
@@ -64,9 +66,12 @@ public class BookService {
 	 * @return
 	 */
 	public Book createBook(Book book) {
+		if (books.stream().anyMatch(b -> b.getTitle().equalsIgnoreCase(book.getTitle()))) {
+			throw new DuplicateBookException("A book with the same title already exists.");
+		}
 		book.setISBN(Long.parseLong(ISBNGenerator.generateISBN()));
 		books.add(book);
-		logger.info("The book {} was created", book.toString());
+		logger.info("The book {} was created successfully.", book.toString());
 		return book;
 	}
 
@@ -78,7 +83,7 @@ public class BookService {
 	 */
 	public Book updateBook(long isbn, Book updateBook) {
 		Book book = books.stream().filter(b -> b.getISBN() == isbn).findFirst()
-				.orElseThrow(() -> new IllegalArgumentException("Book not found with ISBN " + isbn));
+				.orElseThrow(() -> new BookNotFoundException("Book not found with ISBN " + isbn));
 		book.setTitle(updateBook.getTitle());
 		book.setAuthor(updateBook.getAuthor());
 		book.setPrice(updateBook.getPrice());
@@ -99,8 +104,9 @@ public class BookService {
 	 */
 	public Book partialUpdateBook(long isbn, Book updateBook) {
 		Book book = books.stream().filter(b -> b.getISBN() == isbn).findFirst()
-				.orElseThrow(() -> new IllegalArgumentException("Book not found with ISBN " + isbn));
-		book.setPrice(updateBook.getPrice());
+				.orElseThrow(() -> new BookNotFoundException("Book not found with ISBN " + isbn));
+		System.out.println(book);
+		//book.setPrice(updateBook.getPrice());
 		return book;
 	}
 

@@ -2,17 +2,30 @@ package com.relatos.catalogue.model;
 
 import java.util.ArrayList;
 
+import com.relatos.catalogue.validation.PartialUpdate;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
 public class Book {
-	long ISBN;
-	String title;
-	String author;
-	double price;
-	String cover;
-	String description;
-	String publicationDate;
-	ArrayList<String> genre;
-	double rate;
-	boolean display;
+	private long ISBN;
+
+	@NotNull(message = "Title cannot be null")
+	@NotBlank(message = "Title cannot be empty")
+	private String title;
+
+	private String author;
+
+	@Positive(message = "Price must be greater than 0", groups = PartialUpdate.class)
+	private double price;
+
+	private String cover;
+	private String description;
+	private String publicationDate;
+	private ArrayList<String> genre;
+	private double rate;
+	private boolean display;
 
 	public long getISBN() {
 		return ISBN;
