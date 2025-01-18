@@ -69,15 +69,17 @@ public class BookCatalogueController {
 	 * @return
 	 */
 	@GetMapping("/{isbn}")
-	public ResponseEntity<?> getBooksByISBN(@Valid @PathVariable long isbn) {
+	public ResponseEntity<?> getBooksByISBN(@PathVariable long isbn) {
 		try {
 			Book book = bookService.getBookByISBN(isbn);
-			logger.info("[BookCatalogue - getBooksByISBN] Successfully found a book with ISBN: {}.", isbn);
-			logger.debug("[BookCatalogue - getBooksByISBN] Book details: {}.", book.toString());
 			return ResponseEntity.ok(book);
-		} catch (Exception e) {
-			logger.error("[BookCatalogue - getBooksByISBN] No book found with the provided ISBN: {}.", isbn);
+		} catch (IllegalArgumentException e) {
+			logger.warn("[BookCatalogue - getBooksByISBN] Client error: {}", e.getMessage());
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+		} catch (Exception e) {
+			logger.error("[BookCatalogue - getBooksByISBN] Server error: {}", e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(Map.of("error", "An unexpected error occurred."));
 		}
 	}
 
@@ -93,30 +95,25 @@ public class BookCatalogueController {
 	 * @return
 	 */
 	@GetMapping("/search")
-	public ResponseEntity<?> searchBooks(@Valid @RequestParam(required = false) String title,
-			@RequestParam(required = false) String author, @RequestParam(required = false) String publicationDate,
-			@RequestParam(required = false) String genre, @RequestParam(required = false) Long isbn,
-			@RequestParam(required = false) Double rate, @RequestParam(required = false) Boolean display) {
-		try {
-			List<Book> books = bookService.searchBooks(title, author, publicationDate, genre, isbn, rate, display);
-			if (books.isEmpty()) {
-				logger.error(
-						"[BookCatalogue - searchBooks] No books match the given criteria. Title: {}, Author: {}, Genre: {}, PublicationDate: {}, ISBN: {}, Rate: {}, Display: {}. ",
-						title, author, genre, publicationDate, isbn, rate, display);
-				return ResponseEntity.status(HttpStatus.NOT_FOUND)
-						.body(Map.of("error", "No books matching the criteria were found."));
-			}
-			logger.info("[BookCatalogue - searchBooks] Books matching the search criteria were found. Count: {}.",
-					books.size());
-			logger.debug("[BookCatalogue - searchBooks] Matching books: {}.", books.toString());
-			return ResponseEntity.ok(books);
-		} catch (Exception e) {
-			logger.error(
-					"[BookCatalogue - searchBooks] An unexpected error occurred while searching for books. Error: {}",
-					e.getMessage());
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(Map.of("error", "An unexpected error occurred."));
-		}
+	public ResponseEntity<?> searchBooks(
+	        @RequestParam(required = false) String title,
+	        @RequestParam(required = false) String author,
+	        @RequestParam(required = false) String genre,
+	        @RequestParam(required = false) Long isbn,
+	        @RequestParam(required = false) Double rate,
+	        @RequestParam(required = false) Boolean display) {
+	    try {
+	        List<Book> books = bookService.searchBooks(title, author, genre, isbn, rate, display);
+	        if (books.isEmpty()) {
+	            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+	                    .body(Map.of("error", "No books matching the criteria were found."));
+	        }
+	        return ResponseEntity.ok(books);
+	    } catch (Exception e) {
+	        logger.error("[BookCatalogue - searchBooks] Unexpected error: {}", e.getMessage());
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body(Map.of("error", "An unexpected error occurred."));
+	    }
 	}
 
 	/**
@@ -125,16 +122,17 @@ public class BookCatalogueController {
 	 * @return
 	 */
 	@PostMapping
-	public ResponseEntity<?> createBook(@Validated(PartialUpdate.class) @RequestBody Book createBook) {
+	public ResponseEntity<?> createBook(@RequestBody @Valid Book book) {
 		try {
-			Book book = bookService.createBook(createBook);
-			logger.info("[BookCatalogue - createBook] Successfully created a book titled '{}'.", createBook.getTitle());
-			return ResponseEntity.status(HttpStatus.CREATED).body(book);
+			Book createdBook = bookService.createBook(book);
+			return ResponseEntity.status(HttpStatus.CREATED).body(createdBook);
+		} catch (IllegalArgumentException e) {
+			logger.warn("[BookCatalogue - createBook] Client error: {}", e.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
 		} catch (Exception e) {
-			logger.error("[BookCatalogue - createBook] Failed to create the book titled '{}'. Error: {}",
-					createBook.getTitle(), e.getMessage());
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body(Map.of("error", "A book with the same title already exists"));
+			logger.error("[BookCatalogue - createBook] Server error: {}", e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(Map.of("error", "An unexpected error occurred."));
 		}
 	}
 
@@ -145,17 +143,17 @@ public class BookCatalogueController {
 	 * @return
 	 */
 	@PutMapping("/{isbn}")
-	public ResponseEntity<?> updateFullBook(@Valid @PathVariable long isbn,@Validated(PartialUpdate.class) @RequestBody Book updateBook) {
-		try {
-			Book book = bookService.updateBook(isbn, updateBook);
-			logger.info("[BookCatalogue - updateFullBook] Successfully updated the book titled '{}'.",
-					updateBook.getTitle());
-			logger.debug("[BookCatalogue - updateFullBook] Updated book details: {}.", updateBook.toString());
-			return ResponseEntity.ok(book);
-		} catch (Exception e) {
-			logger.error("[BookCatalogue - updateFullBook] Failed to update the book with ISBN {}.", isbn);
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
-		}
+	public ResponseEntity<?> updateBook(@PathVariable long isbn, @RequestBody Book updateBook) {
+	    try {
+	        Book updatedBook = bookService.updateBook(isbn, updateBook);
+	        return ResponseEntity.ok(updatedBook);
+	    } catch (IllegalArgumentException e) {
+	        logger.warn("[BookCatalogue - updateBook] Client error: {}", e.getMessage());
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+	    } catch (Exception e) {
+	        logger.error("[BookCatalogue - updateBook] Server error: {}", e.getMessage());
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "An unexpected error occurred."));
+	    }
 	}
 
 	/**
@@ -165,7 +163,8 @@ public class BookCatalogueController {
 	 * @return
 	 */
 	@PatchMapping("/{isbn}")
-	public ResponseEntity<?> partialUpdateBook(@Valid @PathVariable long isbn, @Validated(PartialUpdate.class) @RequestBody Book updateBook) {
+	public ResponseEntity<?> partialUpdateBook(@Valid @PathVariable long isbn,
+			@Validated(PartialUpdate.class) @RequestBody Book updateBook) {
 		try {
 			Book book = bookService.partialUpdateBook(isbn, updateBook);
 			logger.info(

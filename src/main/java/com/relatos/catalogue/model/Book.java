@@ -1,30 +1,63 @@
 package com.relatos.catalogue.model;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import com.relatos.catalogue.validation.PartialUpdate;
-
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 
+@Entity
+@Table(name = "books")
 public class Book {
+
+	@Id
+	@Column(name = "isbn", nullable = false, unique = true)
 	private long ISBN;
 
 	@NotNull(message = "Title cannot be null")
 	@NotBlank(message = "Title cannot be empty")
+	@Size(max = 255, message = "Title cannot exceed 255 characters")
+	@Column(nullable = false)
 	private String title;
 
+	@NotNull(message = "Author cannot be null")
+	@NotBlank(message = "Author cannot be empty")
+	@Size(max = 255, message = "Author cannot exceed 255 characters")
+	@Column(nullable = false)
 	private String author;
 
-	@Positive(message = "Price must be greater than 0", groups = PartialUpdate.class)
+	@Positive(message = "Price must be greater than 0")
+	@Column(nullable = false)
 	private double price;
 
+	@Pattern(regexp = "^(http|https)://.*$", message = "Cover must be a valid URL")
 	private String cover;
+
+	@Size(max = 5000, message = "Description cannot exceed 5000 characters")
+	@Column(columnDefinition = "TEXT")
 	private String description;
+
+	@Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$", message = "Publication date must follow the format yyyy-MM-dd")
 	private String publicationDate;
-	private ArrayList<String> genre;
+
+	@ElementCollection
+	@CollectionTable(name = "book_genre", joinColumns = @JoinColumn(name = "book_isbn"))
+	@Column(name = "genre")
+	@NotEmpty(message = "Genres cannot be empty")
+	@Size(max = 10, message = "A book cannot have more than 10 genres")
+	private List<String> genre = new ArrayList<>();
+
+	@Min(value = 1, message = "Rate must be at least 1")
+	@Max(value = 5, message = "Rate cannot exceed 5")
 	private double rate;
+
 	private boolean display;
 
 	public long getISBN() {
@@ -59,11 +92,11 @@ public class Book {
 		this.price = price;
 	}
 
-	public String getcover() {
+	public String getCover() {
 		return cover;
 	}
 
-	public void setcover(String cover) {
+	public void setCover(String cover) {
 		this.cover = cover;
 	}
 
@@ -83,11 +116,11 @@ public class Book {
 		this.publicationDate = publicationDate;
 	}
 
-	public ArrayList<String> getGenre() {
+	public List<String> getGenre() {
 		return genre;
 	}
 
-	public void setGenre(ArrayList<String> genre) {
+	public void setGenre(List<String> genre) {
 		this.genre = genre;
 	}
 
