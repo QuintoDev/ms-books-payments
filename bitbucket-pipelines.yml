@@ -1,12 +1,22 @@
-image: maven:3.9.9
+image: debian:bullseye-slim
 
 pipelines:
   default:
-   - step: 
-       name: Install dependencies
-       services:
-        - docker
-       caches:
-        - maven
-       script:
-        - apt-get update && apt-get install -y docker.io
+    - step:
+        name: Build with Maven and Docker
+        services:
+          - docker
+        caches:
+          - maven
+        script:
+          # Actualiza el sistema
+          - apt-get update && apt-get install -y curl gnupg apt-transport-https
+
+          # Instalar Maven
+          - curl -fsSL https://www.apache.org/dist/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz | tar -xz -C /usr/local/
+          - ln -s /usr/local/apache-maven-3.9.9/bin/mvn /usr/bin/mvn
+          - mvn -version
+
+          # Instalar Docker
+          - apt-get install -y docker.io
+          - docker --version
