@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -106,7 +105,7 @@ public class BookCatalogueController {
 		    responses = {
 		        @io.swagger.v3.oas.annotations.responses.ApiResponse(
 		            responseCode = "200",
-		            description = "Libro encontrado con éxito",
+		            description = "Historial de transacciones obtenido con éxito",
 		            content = @io.swagger.v3.oas.annotations.media.Content(
 		                mediaType = "application/json",
 		                schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = Book.class)
