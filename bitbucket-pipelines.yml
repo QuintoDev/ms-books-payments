@@ -11,6 +11,10 @@ pipelines:
         script:
           # Actualiza el sistema
           - apt-get update && apt-get install -y curl gnupg apt-transport-https
+          
+          # Instalar Java
+          - apt-get install -y openjdk-17-jdk
+          - java -version
 
           # Instalar Maven
           - curl -fsSL https://www.apache.org/dist/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz | tar -xz -C /usr/local/
