@@ -7,6 +7,5 @@ pipelines:
       script:
           - echo "Run Maven Clean & Package"
           - mvn clean package
-          - ls
           - cd target
-          - ls
+          - docker
