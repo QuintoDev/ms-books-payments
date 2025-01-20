@@ -6,7 +6,7 @@ pipelines:
       name: 'Install dependencies'
       script:
         - echo "Install Docker"...
-        - yum install docker -y
+        - apt install docker -y
   - step:
       name: 'Maven Clean & Package'
       script:
