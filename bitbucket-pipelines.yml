@@ -1,12 +1,7 @@
-image: maven:3.3.9
+image: maven:3.9.9
 
 pipelines:
   default:
-  - step:
-      name: 'Maven Install'
-      script:
-          - echo "Run Maven install"
-          - mvn install
   - step:
       name: 'Maven Clean & Package'
       script:
