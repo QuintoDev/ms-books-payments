@@ -36,4 +36,4 @@ jobs:
         run: |
           aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/d4x9j1e4
           docker tag relatos/ms-books-catalogue:latest public.ecr.aws/d4x9j1e4/relatos/ms-books-catalogue:latest
-          docker push public.ecr.aws/d4x9j1e4/relatos/ms-books-catalogue:latest
+          docker push public.ecr.aws/d4x9j1e4/relatos/ms-books-catalogue:${{ github.ref_name }}
