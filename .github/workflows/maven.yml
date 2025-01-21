@@ -1,6 +1,6 @@
 name: Java CI with Maven
 
-on: 
+on:
   push:
     branches:
       - dev
@@ -12,7 +12,5 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Run a docker test
-        run: docker
-      - name: Run a maven test
-        run: mvn -B -DskipTests clean package
+      - name: Build with Maven
+        run: mvn clean package && ls -l target
