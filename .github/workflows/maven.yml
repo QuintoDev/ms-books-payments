@@ -21,3 +21,6 @@ jobs:
       
       - name: Build with Maven
         run: mvn clean package && pwd && ls -l target
+      
+      - name: Create Docker Image
+        run: docker build -t ms-book-catalogue-service .
