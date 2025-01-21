@@ -1,4 +1,4 @@
-name: Hello World Workflow
+name: Java CI with Maven
 
 on: 
   push:
@@ -7,13 +7,10 @@ on:
 
 jobs:
   hello-world:
-    runs-on: ubuntu-latest  # Elige el sistema operativo para el runner
+    runs-on: ubuntu-latest
 
     steps:
-      # Paso 1: Checkout del repositorio
       - name: Checkout code
         uses: actions/checkout@v3
-
-      # Paso 2: "Hola Mundo"
-      - name: Print Hello World
-        run: echo "Hola, ¡este es mi primer workflow en GitHub Actions! 🎉"
+      - name: Run a docker test
+        run: docker
