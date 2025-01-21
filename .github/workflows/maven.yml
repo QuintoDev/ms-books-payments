@@ -2,8 +2,8 @@ name: Java CI with Maven
 
 on:
   push:
-    branches:
-      - dev
+    tags:
+      - 'v*.*.*'
 
 jobs:
   ms-book-catalogue-service:
